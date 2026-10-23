@@ -638,11 +638,11 @@ impl ClientShellState {
                     Ok(crate::api::schema::ResponseResult::PaneSelection { text, .. })
                         if !text.is_empty() =>
                     {
-                        let repaint = self.show_copy_feedback(std::time::Instant::now());
-                        (
-                            repaint,
-                            vec![ClientShellAction::ClipboardWrite(text.into_bytes())],
-                        )
+                        // N13: do NOT claim a copy here.  The write happens when the action is
+                        // processed (shell_runtime) and the feedback is emitted from its OUTCOME - the
+                        // old code toasted "copied to clipboard" on the SELECTION alone, before/regardless
+                        // of whether any clipboard write succeeded.
+                        (false, vec![ClientShellAction::ClipboardWrite(text.into_bytes())])
                     }
                     Ok(crate::api::schema::ResponseResult::PaneSelection { .. }) => {
                         (false, Vec::new())

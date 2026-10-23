@@ -1820,11 +1820,29 @@ impl ClientShellState {
     }
 
     pub(crate) fn show_copy_feedback(&mut self, now: std::time::Instant) -> bool {
+        self.show_copy_feedback_message(now, "copied to clipboard")
+    }
+
+    /// N13: an HONEST failure message instead of the success claim.
+    pub(crate) fn show_copy_failure(&mut self, now: std::time::Instant) -> bool {
+        self.show_copy_feedback_message(now, "copy failed: clipboard unavailable")
+    }
+
+    /// N13: the OSC 52 path cannot be verified - never claim a copy that may not have happened.
+    pub(crate) fn show_copy_unverified(&mut self, now: std::time::Instant) -> bool {
+        self.show_copy_feedback_message(now, "copy sent to the terminal (unverified)")
+    }
+
+    pub(crate) fn show_copy_feedback_message(
+        &mut self,
+        now: std::time::Instant,
+        message: &str,
+    ) -> bool {
         if !self.config.clipboard_toast_enabled {
             return false;
         }
         self.copy_feedback = Some(crate::app::state::CopyFeedback {
-            message: "copied to clipboard".to_owned(),
+            message: message.to_owned(),
         });
         self.copy_feedback_deadline = Some(now + std::time::Duration::from_secs(2));
         true
